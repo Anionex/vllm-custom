@@ -60,6 +60,9 @@ from .interfaces import SupportsLoRA
 from .utils import (AutoWeightsLoader, PPMissingLayer, is_pp_missing_parameter,
                     make_layers)
 
+import custom_ops
+
+torch.compiler.allow_in_graph(custom_ops.silu_and_mul_custom)
 
 def _is_moe(config: PretrainedConfig) -> bool:
     num_experts = getattr(config, "num_experts", None)
@@ -111,11 +114,10 @@ class HunYuanMLP(nn.Module):
         if hidden_act != "silu":
             raise ValueError(f"Unsupported activation: {hidden_act}. "
                              "Only silu is supported for now.")
-        self.act_fn = SiluAndMul()
 
     def forward(self, x):
         gate_up, _ = self.gate_up_proj(x)
-        x = self.act_fn(gate_up)
+        x = custom_ops.silu_and_mul_custom(gate_up)
         x, _ = self.down_proj(x)
         return x
 
