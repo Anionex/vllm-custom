@@ -61,9 +61,10 @@ from .utils import (AutoWeightsLoader, PPMissingLayer, is_pp_missing_parameter,
                     make_layers)
 
 import custom_ops
-import custom_ops_rms_norm # 加载 rms_norm_custom 算子
+import custom_ops_rms_norm  # 加载 rms_norm_custom 算子
 
 torch.compiler.allow_in_graph(custom_ops.silu_and_mul_custom)
+torch.compiler.allow_in_graph(custom_ops_rms_norm.rms_norm_custom)
 
 def _is_moe(config: PretrainedConfig) -> bool:
     num_experts = getattr(config, "num_experts", None)
